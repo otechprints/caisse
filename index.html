@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caisse atelier</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#13181F">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#EEF1F4;--surface:#FFFFFF;--ink:#13181F;--muted:#5B6672;--line:#D5DBE2;
+  --in:#0A7F99;--in-bg:#DDF1F6;--out:#B4175F;--out-bg:#F9E0EC;--key:#13181F;--keyfg:#FFFFFF;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1318;--surface:#1A2028;--ink:#EDF1F5;--muted:#9AA6B2;--line:#2C3541;
+  --in:#4CC3DD;--in-bg:#12333C;--out:#F06BA3;--out-bg:#3E1830;--key:#EDF1F5;--keyfg:#0F1318;}}
+:root[data-theme="dark"]{
+  --bg:#0F1318;--surface:#1A2028;--ink:#EDF1F5;--muted:#9AA6B2;--line:#2C3541;
+  --in:#4CC3DD;--in-bg:#12333C;--out:#F06BA3;--out-bg:#3E1830;--key:#EDF1F5;--keyfg:#0F1318;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Archivo",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:22px;margin:4px 0 14px;letter-spacing:-.01em}
+h2{font-size:15px;margin:0 0 10px;color:var(--muted);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:10px 14px;font:inherit;font-weight:600;min-height:44px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--key);color:var(--keyfg);border-color:var(--key)}
+.chip.sm{padding:6px 11px;min-height:34px;font-weight:500;font-size:14px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.seg button{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:14px;font:inherit;font-weight:700;min-height:50px;cursor:pointer}
+.seg button.in[aria-pressed="true"]{background:var(--in-bg);border-color:var(--in);color:var(--in)}
+.seg button.out[aria-pressed="true"]{background:var(--out-bg);border-color:var(--out);color:var(--out)}
+.tabs{margin:0 0 14px}
+.tabs button[aria-pressed="true"]{background:var(--key);color:var(--keyfg);border-color:var(--key)}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
+input[type=text],input[type=number],input[type=date],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:12px;min-height:46px}
+input#amt{font-size:30px;font-weight:700;text-align:right;letter-spacing:-.02em}
+.save{width:100%;margin-top:14px;border:0;border-radius:12px;background:var(--key);color:var(--keyfg);font:inherit;font-weight:700;font-size:17px;padding:16px;cursor:pointer}
+:focus-visible{outline:3px solid var(--in);outline-offset:2px}
+.msg{min-height:20px;font-size:14px;margin-top:8px;color:var(--in)}
+.tot{display:grid;grid-template-columns:1fr auto auto auto;gap:6px 12px;align-items:baseline;font-variant-numeric:tabular-nums}
+.tot .h{font-size:12px;color:var(--muted);text-align:right}
+.tot .n{font-weight:600}
+.tot .r{text-align:right}
+.in-c{color:var(--in)}.out-c{color:var(--out)}
+.tot .sum{font-weight:800;border-top:1.5px solid var(--ink);padding-top:8px;margin-top:4px}
+.res{font-weight:700}
+.bal{display:flex;justify-content:space-between;padding:6px 0;font-variant-numeric:tabular-nums}
+.bal.sum{font-weight:800;border-top:1.5px solid var(--ink);margin-top:4px;padding-top:8px}
+.ops{list-style:none;margin:0;padding:0}
+.ops li{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.ops li:last-child{border:0}
+.ops .t{flex:1;min-width:0}
+.ops .t small{display:block;color:var(--muted)}
+.ops .a{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.x{border:0;background:none;color:var(--muted);font-size:20px;cursor:pointer;min-width:40px;min-height:40px}
+.empty{color:var(--muted);padding:6px 0}
+.row{display:flex;gap:8px;margin-bottom:8px}
+.row input{flex:1;min-width:0}
+.row input.o{flex:0 0 120px;text-align:right}
+.btn{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 14px;font:inherit;font-weight:600;cursor:pointer;min-height:44px}
+details summary{cursor:pointer;font-weight:600;color:var(--muted);padding:6px 0}
+.note{font-size:13px;color:var(--muted);margin-top:8px}
+textarea{min-height:80px;font-size:13px}
+select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:12px;min-height:46px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Caisse atelier</h1>
+  <div class="seg tabs" id="tabs"></div>
+  <div class="card" id="bk" style="display:none"></div>
+
+  <section class="card" aria-label="Nouvelle opération">
+    <h2 id="unitTitle">Machine</h2>
+    <div class="chips" id="units"></div>
+    <div class="seg">
+      <button class="in" id="bIn" aria-pressed="true">Recette</button>
+      <button class="out" id="bOut" aria-pressed="false">Dépense</button>
+    </div>
+    <label for="amt">Montant (FCFA)</label>
+    <input id="amt" type="number" inputmode="numeric" step="1" min="0" placeholder="0">
+    <label>Catégorie</label>
+    <div class="chips" id="cats"></div>
+    <div id="cliBox"><label for="cli">Client (facultatif)</label><select id="cli"></select></div>
+    <label for="note">Note (facultatif)</label>
+    <input id="note" type="text" placeholder="Client, référence…">
+    <button class="save" id="save">Enregistrer</button>
+    <div class="msg" id="msg" role="status"></div>
+  </section>
+
+  <section class="card" aria-label="Bilan du jour">
+    <div class="row"><input id="day" type="date" aria-label="Jour affiché"><button class="btn" id="today">Aujourd'hui</button></div>
+    <div class="tot" id="totals"></div>
+    <div class="note" id="all"></div>
+  </section>
+
+  <section class="card" aria-label="Soldes">
+    <h2>Solde en caisse à la fin de ce jour</h2>
+    <div id="bal"></div>
+  </section>
+
+  <section class="card" id="cliCard" aria-label="Clients">
+    <h2>Historique des clients</h2>
+    <select id="hc" aria-label="Choisir un client"></select>
+    <div class="note" id="hsum"></div>
+    <ul class="ops" id="hlist"></ul>
+    <div class="row" style="margin-top:12px"><input id="newC" type="text" placeholder="Nouveau client" aria-label="Nom du nouveau client"><button class="btn" id="addC">Ajouter</button></div>
+  </section>
+
+  <section class="card" aria-label="Opérations du jour">
+    <h2>Opérations du jour</h2>
+    <ul class="ops" id="ops"></ul>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Réglages</summary>
+      <div id="uset"></div>
+      <div class="note">Le solde initial est le montant que vous aviez en caisse pour ce poste avant la première opération saisie ici.</div>
+      <h2 style="margin-top:16px">Google Sheets</h2>
+      <label for="gurl">Lien du script Google</label><input id="gurl" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+      <label for="gtok">Code secret</label><input id="gtok" type="text">
+      <div class="row" style="margin-top:8px"><button class="btn" id="gsave">Enregistrer et tout envoyer</button><button class="btn" id="gpull">Restaurer depuis Google</button></div>
+      <div class="note" id="syncMsg"></div>
+      <h2 style="margin-top:16px">Sauvegarde</h2>
+      <button class="btn" id="share" style="width:100%;margin-bottom:8px">Envoyer la sauvegarde (WhatsApp, e-mail…)</button>
+      <div class="row"><button class="btn" id="copy">Copier la sauvegarde</button><button class="btn" id="csv">Copier en CSV (Excel)</button></div>
+      <div class="note" id="copyMsg">Les données restent sur cet appareil, dans ce navigateur. Copiez une sauvegarde de temps en temps et collez-la dans vos notes.</div>
+      <label for="rst">Restaurer une sauvegarde (remplace les données actuelles)</label>
+      <textarea id="rst" placeholder="Collez ici la sauvegarde copiée plus tôt"></textarea>
+      <button class="btn" id="restore" style="margin-top:8px">Restaurer</button>
+    </details>
+  </section>
+</main>
+
+<script>
+(function(){
+  var KEY='caisse-atelier-v1';
+  var ACT=['Imprimerie','WiFiZONE'];
+  var LAB={Imprimerie:'Machine',WiFiZONE:'Quartier'};
+  var DEFU=[['NOIR 4535','Imprimerie'],['COULEUR 5235','Imprimerie'],['COULEUR 3535','Imprimerie'],['EXTRÊME','Imprimerie'],['DIOULAKRO','WiFiZONE'],['BELLEVILLE','WiFiZONE']];
+  var CATS={
+    Imprimerie:{in:['Impression','Façonnage','Vente','Autre'],out:['Encre / toner','Papier','Maintenance','Pièces','Autre']},
+    WiFiZONE:{in:['Vente de tickets','Abonnement','Autre'],out:['Forfait internet','Électricité','Maintenance','Matériel','Autre']}
+  };
+  function defUnits(){return DEFU.map(function(d){return {n:d[0],a:d[1],o:0}})}
+  var st={v:2,units:defUnits(),ops:[],clients:[]};
+  function migrate(p){
+    if(!p||!p.ops)return st;
+    if(p.v===2&&p.units){if(!p.clients)p.clients=[];return p;}
+    var old=p.machines||[];
+    if(!p.ops.length&&old.join('|')==='Machine 1|Machine 2|Machine 3')old=[];
+    var units=old.map(function(m){return {n:m,a:'Imprimerie',o:0}});
+    var ops=p.ops.map(function(o){return {id:o.id,date:o.date,unit:o.machine,type:o.type,amount:o.amount,cat:o.cat,note:o.note}});
+    DEFU.forEach(function(d){if(!units.some(function(u){return u.n===d[0]}))units.push({n:d[0],a:d[1],o:0})});
+    return {v:2,units:units,ops:ops,clients:[]};
+  }
+  try{var raw=localStorage.getItem(KEY);if(raw)st=migrate(JSON.parse(raw));}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}qcfg();}
+  var QK='caisse-atelier-queue',SK='caisse-atelier-sync';
+  var sy={url:'',tok:''},Q=[],busy=false;
+  try{sy=JSON.parse(localStorage.getItem(SK))||sy}catch(e){}
+  try{Q=JSON.parse(localStorage.getItem(QK))||[]}catch(e){}
+  function sq(){try{localStorage.setItem(QK,JSON.stringify(Q))}catch(e){}}
+  function ssave(){try{localStorage.setItem(SK,JSON.stringify(sy))}catch(e){}}
+  function ev(k,x){if(!sy.url)return;if(k==='cfg')Q=Q.filter(function(e){return e.k!=='cfg'});Q.push({k:k,x:x});sq();flush()}
+  function qop(o){var u=st.units.filter(function(z){return z.n===o.unit})[0];ev('add',{id:o.id,date:o.date,act:u?u.a:'',unit:o.unit,type:o.type,cat:o.cat,client:o.client||'',amount:o.amount,note:o.note||''})}
+  function qcfg(){ev('cfg',{v:2,units:st.units,clients:st.clients})}
+  function sstat(){var m=document.getElementById('syncMsg');if(!m)return;m.textContent=!sy.url?'Synchronisation non configurée.':(Q.length?Q.length+' élément(s) en attente d\'envoi (partiront dès que la connexion revient).':'Tout est synchronisé avec Google Sheets.')}
+  function flush(){
+    sstat();if(!sy.url||!Q.length||busy||navigator.onLine===false)return;
+    busy=true;var n=Q.length,good=false;
+    fetch(sy.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:sy.tok,events:Q.slice(0,n)})})
+    .then(function(r){return r.json()})
+    .then(function(j){if(j&&j.ok){Q=Q.slice(n);sq();good=true}else{var m=document.getElementById('syncMsg');if(m)m.textContent='Refusé par Google : '+((j&&j.err)||'erreur')}})
+    .catch(function(){})
+    .then(function(){busy=false;sstat();if(good&&Q.length)flush()});
+  }
+  function pull(){
+    var m=document.getElementById('syncMsg');
+    if(!sy.url){m.textContent='Renseignez d\'abord le lien Google.';return}
+    m.textContent='Récupération en cours…';
+    fetch(sy.url+(sy.url.indexOf('?')<0?'?':'&')+'action=dump&token='+encodeURIComponent(sy.tok))
+    .then(function(r){return r.json()})
+    .then(function(j){if(!j||!j.ok)throw 0;
+      st={v:2,units:(j.cfg&&j.cfg.units)||st.units,clients:(j.cfg&&j.cfg.clients)||st.clients,ops:j.ops};
+      save();renderAll();m.textContent='Données restaurées depuis Google Sheets ('+j.ops.length+' opérations).'})
+    .catch(function(){m.textContent='Récupération impossible. Vérifiez le lien et le code secret.'});
+  }
+
+  save();
+  function $(id){return document.getElementById(id)}
+  function iso(d){var m=d.getMonth()+1,j=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(j<10?'0':'')+j}
+  var nf=new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0});
+  function f(n){return nf.format(n)}
+  function fm(n){return nf.format(n)+' FCFA'}
+  function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+  function unitsOf(a){return st.units.filter(function(u){return u.a===a})}
+  function actOf(name){var u=st.units.filter(function(x){return x.n===name})[0];return u?u.a:null}
+  var cur={act:ACT[0],unit:null,type:'in',cat:null,day:iso(new Date())};
+
+  function renderTabs(){
+    var c=$('tabs');c.innerHTML='';
+    ACT.forEach(function(a){
+      var b=el('button',null,a);b.setAttribute('aria-pressed',a===cur.act);
+      b.onclick=function(){cur.act=a;cur.unit=null;cur.cat=null;renderAll()};c.appendChild(b);
+    });
+  }
+  function renderUnits(){
+    $('unitTitle').textContent=LAB[cur.act];
+    var c=$('units');c.innerHTML='';var us=unitsOf(cur.act);
+    if(!us.some(function(u){return u.n===cur.unit}))cur.unit=us.length?us[0].n:null;
+    us.forEach(function(u){
+      var b=el('button','chip',u.n);b.setAttribute('aria-pressed',u.n===cur.unit);
+      b.onclick=function(){cur.unit=u.n;renderUnits()};c.appendChild(b);
+    });
+  }
+  function renderCats(){
+    var c=$('cats');c.innerHTML='';var list=CATS[cur.act][cur.type];
+    if(list.indexOf(cur.cat)<0)cur.cat=list[0];
+    list.forEach(function(k){
+      var b=el('button','chip sm',k);b.setAttribute('aria-pressed',k===cur.cat);
+      b.onclick=function(){cur.cat=k;renderCats()};c.appendChild(b);
+    });
+    $('bIn').setAttribute('aria-pressed',cur.type==='in');
+    $('bOut').setAttribute('aria-pressed',cur.type==='out');
+    $('cliBox').style.display=(cur.act==='Imprimerie'&&cur.type==='in')?'block':'none';
+  }
+  function renderDay(){
+    $('day').value=cur.day;
+    var dayOps=st.ops.filter(function(o){return o.date===cur.day});
+    var us=unitsOf(cur.act);
+    var t=$('totals');t.innerHTML='';
+    ['FCFA','Reçu','Dépensé','Résultat'].forEach(function(h){t.appendChild(el('div','h',h))});
+    var ti=0,to=0;
+    us.forEach(function(u){
+      var i=0,o=0;
+      dayOps.forEach(function(x){if(x.unit===u.n){if(x.type==='in')i+=x.amount;else o+=x.amount}});
+      ti+=i;to+=o;
+      t.appendChild(el('div','n',u.n));
+      t.appendChild(el('div','r in-c',f(i)));
+      t.appendChild(el('div','r out-c',f(o)));
+      t.appendChild(el('div','r res',f(i-o)));
+    });
+    t.appendChild(el('div','n sum','Total'));
+    t.appendChild(el('div','r in-c sum',f(ti)));
+    t.appendChild(el('div','r out-c sum',f(to)));
+    t.appendChild(el('div','r res sum',f(ti-to)));
+    var ai=0,ao=0;
+    dayOps.forEach(function(x){if(x.type==='in')ai+=x.amount;else ao+=x.amount});
+    $('all').textContent='Toutes activités ce jour : reçu '+fm(ai)+', dépensé '+fm(ao)+', résultat '+fm(ai-ao)+'.';
+    var b=$('bal');b.innerHTML='';var tb=0;
+    us.forEach(function(u){
+      var s=u.o||0;
+      st.ops.forEach(function(x){if(x.unit===u.n&&x.date<=cur.day)s+=(x.type==='in'?x.amount:-x.amount)});
+      tb+=s;
+      var r=el('div','bal');r.appendChild(el('span',null,u.n));r.appendChild(el('strong',null,fm(s)));b.appendChild(r);
+    });
+    var rt=el('div','bal sum');rt.appendChild(el('span',null,'Total '+cur.act));rt.appendChild(el('span',null,fm(tb)));b.appendChild(rt);
+    var ul=$('ops');ul.innerHTML='';
+    var shown=dayOps.filter(function(o){return actOf(o.unit)===cur.act});
+    if(!shown.length){ul.appendChild(el('li','empty','Aucune opération ce jour. Saisissez la première ci-dessus.'));return}
+    shown.slice().reverse().forEach(function(o){
+      var li=el('li');var d=el('div','t',o.unit);
+      d.appendChild(el('small',null,o.cat+(o.client?' · '+o.client:'')+(o.note?' · '+o.note:'')));
+      li.appendChild(d);
+      li.appendChild(el('div','a '+(o.type==='in'?'in-c':'out-c'),(o.type==='in'?'+':'−')+fm(o.amount)));
+      var x=el('button','x','×');x.setAttribute('aria-label','Supprimer cette opération');
+      x.onclick=function(){st.ops=st.ops.filter(function(z){return z.id!==o.id});ev('del',{id:o.id});save();renderDay()};
+      li.appendChild(x);ul.appendChild(li);
+    });
+  }
+  function taken(v){return st.units.some(function(u){return u.n===v})}
+  function renderSettings(){
+    var c=$('uset');c.innerHTML='';
+    ACT.forEach(function(a){
+      c.appendChild(el('h2',null,a+' : '+LAB[a].toLowerCase()+'s et solde initial (FCFA)'));
+      unitsOf(a).forEach(function(u){
+        var r=el('div','row');
+        var inp=el('input');inp.type='text';inp.value=u.n;inp.setAttribute('aria-label','Nom');
+        inp.onchange=function(){
+          var v=inp.value.trim();if(!v||(v!==u.n&&taken(v))){inp.value=u.n;return}
+          st.ops.forEach(function(o){if(o.unit===u.n)o.unit=v});
+          if(cur.unit===u.n)cur.unit=v;u.n=v;st.ops.forEach(function(o){if(o.unit===v)qop(o)});save();renderAll();
+        };
+        var o=el('input','o');o.type='number';o.inputMode='numeric';o.value=u.o||0;o.setAttribute('aria-label','Solde initial de '+u.n);
+        o.onchange=function(){u.o=Math.round(parseFloat(o.value)||0);o.value=u.o;save();renderDay()};
+        var d=el('button','btn','Retirer');
+        d.onclick=function(){
+          var used=st.ops.some(function(x){return x.unit===u.n});
+          if(used||unitsOf(a).length<2){$('copyMsg').textContent='Impossible de retirer '+u.n+' : il a des opérations, ou c\'est le dernier de la liste.';return}
+          st.units=st.units.filter(function(x){return x!==u});save();renderAll();
+        };
+        r.appendChild(inp);r.appendChild(o);r.appendChild(d);c.appendChild(r);
+      });
+      var r2=el('div','row');var ni=el('input');ni.type='text';ni.placeholder='Ajouter : '+LAB[a].toLowerCase();ni.setAttribute('aria-label','Nouveau poste '+a);
+      var ab=el('button','btn','Ajouter');
+      ab.onclick=function(){var v=ni.value.trim();if(!v||taken(v))return;st.units.push({n:v,a:a,o:0});save();renderAll()};
+      r2.appendChild(ni);r2.appendChild(ab);c.appendChild(r2);
+    });
+  }
+  function fd(d){var p=d.split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+  function renderHistory(){var c=$('hc').value,ul=$('hlist'),s=$('hsum');ul.innerHTML='';if(!c){s.textContent='Aucun client enregistré. Ajoutez-en un ci-dessous.';return}var ops=st.ops.filter(function(o){return o.client===c&&o.type==='in'}).sort(function(a,b){return a.date<b.date?-1:(a.date>b.date?1:0)});var tot=0;ops.forEach(function(o){tot+=o.amount});if(!ops.length){s.textContent='Aucun achat enregistré pour ce client.';return}s.textContent=ops.length+' achat'+(ops.length>1?'s':'')+' · total '+fm(tot)+' · moyenne '+fm(Math.round(tot/ops.length))+' · dernier achat le '+fd(ops[ops.length-1].date);ops.slice().reverse().forEach(function(o){var li=el('li');var d=el('div','t',fd(o.date)+' · '+o.unit);d.appendChild(el('small',null,o.cat+(o.note?' · '+o.note:'')));li.appendChild(d);li.appendChild(el('div','a in-c',fm(o.amount)));ul.appendChild(li)})}
+  function renderClients(){$('cliCard').style.display=cur.act==='Imprimerie'?'block':'none';var s=$('cli'),prev=s.value;s.innerHTML='';var o0=el('option',null,'Client de passage');o0.value='';s.appendChild(o0);st.clients.forEach(function(c){var o=el('option',null,c);o.value=c;s.appendChild(o)});s.value=st.clients.indexOf(prev)>=0?prev:'';var h=$('hc'),hp=h.value;h.innerHTML='';st.clients.forEach(function(c){var o=el('option',null,c);o.value=c;h.appendChild(o)});if(st.clients.indexOf(hp)>=0)h.value=hp;renderHistory()}
+  var LB='caisse-atelier-lastbackup';
+  function stamp(){try{localStorage.setItem(LB,String(Date.now()))}catch(e){}}
+  function clip(){var m=$('copyMsg');try{navigator.clipboard.writeText(JSON.stringify(st)).then(function(){stamp();m.textContent='Sauvegarde copiée. Collez-la dans WhatsApp ou vos notes.';renderBk()},function(){m.textContent='Copie impossible depuis ce navigateur.'})}catch(e){m.textContent='Copie impossible depuis ce navigateur.'}}
+  function doBackup(){var m=$('copyMsg');if(navigator.share){navigator.share({title:'Sauvegarde Caisse atelier',text:JSON.stringify(st)}).then(function(){stamp();m.textContent='Sauvegarde envoyée.';renderBk()},function(e){if(!e||e.name!=='AbortError')clip()})}else clip()}
+  function renderBk(){var b=$('bk'),t=0;try{t=parseInt(localStorage.getItem(LB))||0}catch(e){}var days=t?Math.floor((Date.now()-t)/864e5):null;if(!st.ops.length||(days!==null&&days<7)){b.style.display='none';return}b.style.display='block';b.innerHTML='';b.appendChild(el('div',null,'Dernière sauvegarde : '+(days===null?'jamais':'il y a '+days+' jours')+'. Sauvegardez pour ne rien perdre si vous changez ou perdez le téléphone.'));var x=el('button','save','Sauvegarder maintenant');x.style.marginTop='10px';x.onclick=doBackup;b.appendChild(x)}
+  function renderAll(){renderTabs();renderUnits();renderCats();renderDay();renderSettings();renderClients();renderBk()}
+
+  $('bIn').onclick=function(){cur.type='in';renderCats()};
+  $('bOut').onclick=function(){cur.type='out';renderCats()};
+  $('save').onclick=function(){
+    var a=Math.round(parseFloat(String($('amt').value).replace(',','.')));
+    var msg=$('msg');msg.style.color='var(--out)';
+    if(!cur.unit){msg.textContent='Ajoutez d\'abord un poste dans les réglages.';return}
+    if(!(a>0)){msg.textContent='Saisissez un montant supérieur à 0.';return}
+    st.ops.push({id:Date.now()+''+Math.floor(Math.random()*1000),date:iso(new Date()),unit:cur.unit,type:cur.type,amount:a,cat:cur.cat,note:$('note').value.trim(),client:(cur.act==='Imprimerie'&&cur.type==='in')?$('cli').value:''});
+    qop(st.ops[st.ops.length-1]);save();cur.day=iso(new Date());
+    $('amt').value='';$('note').value='';$('cli').value='';
+    msg.style.color='var(--in)';msg.textContent='Enregistré : '+(cur.type==='in'?'recette':'dépense')+' de '+fm(a)+' sur '+cur.unit+'.';
+    renderDay();
+  };
+  $('day').onchange=function(){if(this.value){cur.day=this.value;renderDay()}};
+  $('today').onclick=function(){cur.day=iso(new Date());renderDay()};
+  $('hc').onchange=renderHistory;
+  $('gurl').value=sy.url;$('gtok').value=sy.tok;
+  $('gsave').onclick=function(){sy.url=$('gurl').value.trim();sy.tok=$('gtok').value.trim();ssave();if(sy.url){st.ops.forEach(qop);qcfg()}sstat()};
+  $('gpull').onclick=pull;
+  window.addEventListener('online',flush);setInterval(flush,60000);
+  $('addC').onclick=function(){var v=$('newC').value.trim();if(!v||st.clients.some(function(c){return c.toLowerCase()===v.toLowerCase()}))return;st.clients.push(v);st.clients.sort(function(a,b){return a.localeCompare(b,'fr')});save();$('newC').value='';renderClients();$('hc').value=v;$('cli').value=v;renderHistory()};
+  function copy(txt,okMsg){
+    var m=$('copyMsg');
+    try{navigator.clipboard.writeText(txt).then(function(){m.textContent=okMsg},function(){m.textContent='Copie impossible depuis ce navigateur.'})}
+    catch(e){m.textContent='Copie impossible depuis ce navigateur.'}
+  }
+  $('copy').onclick=clip;$('share').onclick=doBackup;
+  $('csv').onclick=function(){
+    var l=['date;activite;poste;type;categorie;client;montant;note'];
+    st.ops.forEach(function(o){l.push([o.date,actOf(o.unit)||'',o.unit,o.type==='in'?'recette':'depense',o.cat,o.client||'',o.amount,(o.note||'').replace(/;/g,',')].join(';'))});
+    copy(l.join('\n'),'CSV copié. Collez-le dans Excel.');
+  };
+  $('restore').onclick=function(){
+    var m=$('copyMsg');
+    try{
+      var p=JSON.parse($('rst').value);
+      if(!(p&&p.v===2&&Array.isArray(p.units)&&Array.isArray(p.ops)))throw 0;
+      if(!p.clients)p.clients=[];st=p;save();st.ops.forEach(qop);$('rst').value='';renderAll();m.textContent='Sauvegarde restaurée.';
+    }catch(e){m.textContent='Sauvegarde non reconnue. Collez le texte copié avec « Copier la sauvegarde ».'}
+  };
+  renderAll();flush();
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+})();
+</script>
+</body>
+</html>
